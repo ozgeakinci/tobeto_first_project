@@ -1,49 +1,12 @@
 // ignore_for_file: unused_element
 
 import 'package:flutter/material.dart';
+import 'package:introapp/models/main.dart';
 import 'package:introapp/data/questions.dart';
 
-void main() {
-  runApp(const MaterialApp(home: QuestionScreen()));
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/quiz-logo.png',
-              width: 235,
-            ),
-            const Text(
-              'Quiz App',
-              style: TextStyle(
-                color: Colors.blueAccent,
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.arrow_right_alt),
-              label: const Text('Start'),
-              style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.all(20)),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class QuestionScreen extends StatefulWidget {
-  const QuestionScreen({super.key});
+  const QuestionScreen(this.finishPage, {super.key});
+  final void Function() finishPage;
 
   @override
   State<StatefulWidget> createState() => _QuestionState();
@@ -52,7 +15,8 @@ class QuestionScreen extends StatefulWidget {
 class _QuestionState extends State<QuestionScreen> {
   String title = 'Flutter Bil Bakalım';
   int curretIndex = 0;
-  // List<String> answers = ['Cevap1', 'Cevap2', 'Cevap3', 'Cevap3'];
+
+  List<String> userAnswers = List.filled(Questions.length, '');
 
   void nextQuestion() {
     setState(() {
@@ -68,6 +32,12 @@ class _QuestionState extends State<QuestionScreen> {
       if (curretIndex > 0) {
         curretIndex--;
       }
+    });
+  }
+
+  void selectAnswer(String answer) {
+    setState(() {
+      userAnswers[curretIndex] = answer;
     });
   }
 
@@ -115,16 +85,24 @@ class _QuestionState extends State<QuestionScreen> {
                     ),
                     ...options.map(
                       (option) {
+                        final isCorrectAnswer =
+                            option == Questions[curretIndex].correctAnswer;
+                        final isSelectedAnswer =
+                            userAnswers[curretIndex] == option;
                         return Container(
                           margin: const EdgeInsets.all(10.0),
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
+                                backgroundColor: isSelectedAnswer
+                                    ? (isCorrectAnswer
+                                        ? Colors.green
+                                        : Colors.red)
+                                    : Colors.white,
                                 fixedSize: const Size(370, 47),
                                 textStyle: const TextStyle(
                                   fontSize: 20,
                                 )),
-                            onPressed: () => {},
+                            onPressed: () => {selectAnswer(option)},
                             child: Container(
                               margin: const EdgeInsets.all(10.0),
                               // padding: const EdgeInsets.all(20.0),
@@ -181,6 +159,11 @@ class _QuestionState extends State<QuestionScreen> {
                         ],
                       ),
                     ),
+                    ElevatedButton(
+                        onPressed: () {
+                          widget.finishPage();
+                        },
+                        child: const Text('Finish'))
                   ],
                 ),
               ),
